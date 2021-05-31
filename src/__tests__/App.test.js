@@ -3,7 +3,8 @@ import App from '../App.svelte';
 
 describe('App.svelte', () => {
   it('renders Hello with `name` prop', () => {
-    render(App, { name: 'foo' });
-    expect(screen.queryByText(/hello foo/i)).toBeTruthy();
+    render(App);
+    expect(screen.queryByText(/focus/i)).toBeTruthy();
+    expect(screen.queryByText(/enter an app/i)).toBeTruthy();
   });
 });
