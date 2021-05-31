@@ -7,6 +7,15 @@
   let frequencyMins = 60;
   let jobRunning = false;
 
+  $: startDisabled =
+    !app || !activeMins || !frequencyMins || activeMins > frequencyMins;
+
+  $: if (activeMins > frequencyMins) {
+    error = 'Active minutes must be less than minutes between sessions';
+  } else {
+    error = '';
+  }
+
   const startJob = () => {
     ipcRenderer.send('start-job', { app, activeMins, frequencyMins });
   };
@@ -53,9 +62,7 @@
         Active minutes each time
         <input type="text" bind:value={activeMins} />
       </label>
-      <button type="submit" disabled={!(app && activeMins && frequencyMins)}
-        >Start job</button
-      >
+      <button type="submit" disabled={startDisabled}>Start job</button>
     </form>
   {/if}
   {#if error}

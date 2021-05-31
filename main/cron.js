@@ -10,8 +10,23 @@ const activate = ({ bg, app }) =>
 
 const quit = app => `osascript -e 'quit app "${app}"'`;
 
-const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
+const prepareClose = ({ app, activeMins }) => {
   const notification = new Notification({ timeoutType: 'never' });
+  return setTimeout(() => {
+    notification.body = `${app} will close in 10 seconds`;
+    notification.show();
+    setTimeout(() => {
+      notification.close();
+      console.log(`quitting ${app}...`);
+      cmd(quit(app));
+    }, WARNING_TIME);
+  }, ms(activeMins) - WARNING_TIME);
+};
+
+const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
+  if (activeMins > frequencyMins) {
+    throw new Error('Active time cannot be more than frequency');
+  }
 
   console.log(`Starting ${app}`);
   // const command = `echo "Running ${app}${bg ? ' in the background' : ''}..."`
@@ -21,18 +36,11 @@ const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
   console.log(`activateCron:`, activateCron);
 
   cmd(activate({ app, bg }));
+  timeout = prepareClose({ app, activeMins });
   task = cron.schedule(activateCron, () => {
     console.log(`activating ${app}...`);
     cmd(activate({ app, bg }));
-    timeout = setTimeout(() => {
-      notification.body = `${app} will close in 10 seconds`;
-      notification.show();
-      setTimeout(() => {
-        notification.close();
-        console.log(`quitting ${app}...`);
-        cmd(quit(app));
-      }, WARNING_TIME);
-    }, ms(activeMins) - WARNING_TIME);
+    timeout = prepareClose({ app, activeMins });
   });
 
   task.start();
