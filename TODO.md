@@ -1,0 +1,10 @@
+- [ ] Cronjob
+- [ ] New app schedule
+  - [ ] Start time (optional, default to now)
+  - [ ] End time (optional, default to never)
+  - [ ] Open app interval
+  - [ ] Time open interval
+  - [ ] Focus on open (optional, default to true)
+- [ ] List of jobs
+  - [ ] Cancel
+  - [ ] Sleep
