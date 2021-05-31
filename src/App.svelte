@@ -3,23 +3,61 @@
 
   let app = '';
   let error = '';
+  let activeMins = 5;
+  let frequencyMins = 60;
+  let jobRunning = false;
 
   const startJob = () => {
-    ipcRenderer.send('start-job', { app });
+    ipcRenderer.send('start-job', { app, activeMins, frequencyMins });
   };
 
-  ipcRenderer.on('error', (e, { message }) => {
-    console.error('Error:', message);
-    error = message;
+  const stopJob = () => {
+    ipcRenderer.send('stop-job', { app });
+  };
+
+  ipcRenderer.on('start-success', () => {
+    jobRunning = true;
+    error = '';
+  });
+
+  ipcRenderer.on('stop-success', () => {
+    jobRunning = false;
+    error = '';
+  });
+
+  ipcRenderer.on('error', (e, err) => {
+    console.error('Error:', err.message || err);
+    jobRunning = false;
+    error = err.message || err;
   });
 </script>
 
 <main>
   <h1>Focus</h1>
-  <form on:submit|preventDefault={startJob}>
-    <input type="text" bind:value={app} />
-    <button type="submit">{app ? `Start ${app}` : 'Enter an app'}</button>
-  </form>
+  {#if jobRunning}
+    <p>
+      {app} will open for {activeMins} minutes every {frequencyMins} minutes
+    </p>
+    <button on:click={stopJob}>Stop job</button>
+  {:else}
+    <form on:submit|preventDefault={startJob}>
+      <label>
+        App name
+        <input type="text" bind:value={app} />
+      </label>
+      <label>
+        Minutes between sessions
+        <input type="text" bind:value={frequencyMins} />
+      </label>
+      <label>
+        Active minutes each time
+        <input type="text" bind:value={activeMins} />
+      </label>
+      <button type="submit" disabled={!(app && activeMins && frequencyMins)}
+        >Start job</button
+      >
+    </form>
+  {/if}
   {#if error}
     <p class="error">{error}</p>
   {/if}

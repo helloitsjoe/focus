@@ -1,12 +1,11 @@
 const path = require('path');
 const { app, BrowserWindow, Tray, ipcMain } = require('electron');
-const startJob = require('./cron');
+const { startJob, stopJob } = require('./cron');
 
 const assetsDir = path.join(__dirname, '../assets');
 
 let tray;
 let window;
-// let timeout;
 
 app.on('ready', () => {
   tray = new Tray(path.join(assetsDir, 'mbta-logo-black.png'));
@@ -33,24 +32,26 @@ app.on('ready', () => {
   ipcMain.on('start-job', (e, data) => {
     try {
       startJob(data);
+      e.sender.send('start-success');
     } catch (err) {
       console.log(`err:`, err);
-      console.log(`stack:`, err.stack);
-      if (err.stack.match(/Can’t get application/)) {
-        e.sender.send(
-          'error',
-          new Error(`${data.app} is not a valid app name`)
-        );
-      } else {
-        e.sender.send('error', err);
-      }
+      const message =
+        err.stack.match(/Can’t get application/) &&
+        `${data.app} is not a valid app name`;
+
+      e.sender.send('error', message || err);
     }
   });
 
-  // ipcMain.on('change-icon', (sender, data) => {
-  //   const color = data === 'red' ? 'black' : 'green';
-  //   tray.setImage(path.join(assetsDir, `mbta-logo-${color}.png`));
-  // });
+  ipcMain.on('stop-job', (e, { app }) => {
+    try {
+      stopJob(app);
+      e.sender.send('stop-success');
+    } catch (err) {
+      console.log(`err:`, err);
+      e.sender.send('error', err.message);
+    }
+  });
 });
 
 const toggleWindow = () => {
