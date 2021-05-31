@@ -15,8 +15,8 @@ app.on('ready', () => {
     width: 380,
     height: 500,
     show: true,
-    frame: true,
-    resizable: true,
+    frame: false,
+    resizable: false,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
