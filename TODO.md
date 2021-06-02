@@ -5,7 +5,9 @@
   - [x] Open app interval
   - [x] Time open interval
   - [x] Focus on open (optional, default to true)
-- [ ] List of jobs
+- [ ] List of multiple jobs
   - [ ] Cancel
   - [ ] Sleep
 - [ ] Shutdown reminder at 5:30
+- [ ] Block apps from opening
+- [x] TODO list while job is closed

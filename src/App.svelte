@@ -1,20 +1,21 @@
 <script>
   const { ipcRenderer } = require('electron');
+  import TodoList from './TodoList.svelte';
 
   let app = '';
   let error = '';
   let activeMins = 5;
   let frequencyMins = 60;
+  let nextSession = null;
   let jobRunning = false;
 
   $: startDisabled =
     !app || !activeMins || !frequencyMins || activeMins > frequencyMins;
 
-  $: if (activeMins > frequencyMins) {
-    error = 'Active minutes must be less than minutes between sessions';
-  } else {
-    error = '';
-  }
+  $: error =
+    activeMins > frequencyMins
+      ? 'Active minutes must be less than minutes between sessions'
+      : '';
 
   const startJob = () => {
     ipcRenderer.send('start-job', { app, activeMins, frequencyMins });
@@ -48,6 +49,7 @@
       {app} will open for {activeMins} minutes every {frequencyMins} minutes
     </p>
     <button on:click={stopJob}>Stop job</button>
+    <TodoList />
   {:else}
     <form on:submit|preventDefault={startJob}>
       <label>

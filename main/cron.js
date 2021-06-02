@@ -1,9 +1,12 @@
 const { Notification } = require('electron');
 const cron = require('node-cron');
-const { cmd, ms, WARNING_TIME } = require('./utils');
+const { cmd, ms } = require('./utils');
 
 let timeout;
 let task;
+
+const WARN_SECONDS = 30;
+const WARN_MS = WARN_SECONDS * 1000;
 
 const activate = ({ bg, app }) =>
   `osascript -e '${bg ? 'launch' : 'activate'} app "${app}"'`;
@@ -11,16 +14,18 @@ const activate = ({ bg, app }) =>
 const quit = app => `osascript -e 'quit app "${app}"'`;
 
 const prepareClose = ({ app, activeMins }) => {
-  const notification = new Notification({ timeoutType: 'never' });
+  const notification = new Notification({
+    body: `${app} will close in ${WARN_SECONDS} seconds`,
+  });
+
   return setTimeout(() => {
-    notification.body = `${app} will close in 10 seconds`;
     notification.show();
+
     setTimeout(() => {
-      notification.close();
       console.log(`quitting ${app}...`);
       cmd(quit(app));
-    }, WARNING_TIME);
-  }, ms(activeMins) - WARNING_TIME);
+    }, WARN_MS);
+  }, ms(activeMins) - WARN_MS);
 };
 
 const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {

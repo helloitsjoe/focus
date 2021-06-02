@@ -7,4 +7,9 @@ describe('App.svelte', () => {
     expect(screen.queryByText(/focus/i)).toBeTruthy();
     expect(screen.queryByText(/enter an app/i)).toBeTruthy();
   });
+
+  it.todo('button is disabled until app, active and frequency are filled');
+  it.todo('button is disabled if active > frequency');
+  it.todo('error message if active > frequency');
+  it.todo('error message if error during start');
 });
