@@ -1,6 +1,6 @@
 const path = require('path');
 const { app, BrowserWindow, Tray, ipcMain } = require('electron');
-const { startJob, stopJob } = require('./cron');
+const { startJob, stopJob, startWorkingHours } = require('./cron');
 
 const assetsDir = path.join(__dirname, '../assets');
 
@@ -31,7 +31,8 @@ app.on('ready', () => {
 
   ipcMain.on('start-job', (e, data) => {
     try {
-      startJob(data);
+      // startJob(data);
+      startWorkingHours(data);
       e.sender.send('start-success');
     } catch (err) {
       console.log(`err:`, err);

@@ -25,9 +25,9 @@
   };
 </script>
 
+<h2>TODO</h2>
 <form on:submit|preventDefault={addTodo}>
   <label for="text">
-    Don't forget!
     <div class="input-group">
       <input type="text" bind:value id="text" />
       <button type="sumbit">Add</button>

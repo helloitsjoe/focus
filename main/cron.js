@@ -37,6 +37,7 @@ const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
   // const command = `echo "Running ${app}${bg ? ' in the background' : ''}..."`
 
   // Seems like this doesn't handle fractions, e.g. */0.5
+  // I'm also not sure it handles */60 (should be every hour but I think it does every minute)
   const activateCron = `*/${frequencyMins} * * * *`;
   console.log(`activateCron:`, activateCron);
 
@@ -49,18 +50,6 @@ const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
   });
 
   task.start();
-
-  // const stop = () => {
-  //   task.stop();
-  //   clearTimeout(timeout);
-  // };
-
-  // const destroy = () => {
-  //   task.destroy();
-  //   clearTimeout(timeout);
-  // };
-
-  // return { ...task, stop, destroy };
   return task;
 };
 
@@ -73,4 +62,17 @@ const stopJob = app => {
   }
 };
 
-module.exports = { startJob, stopJob };
+const startWorkingHours = data => {
+  startJob(data);
+  // TODO: Make these configurable from the frontend
+  // TODO: Make these cancelable/changeable
+  cron.schedule('0 18 1,2,3,4,5 * *', () => {
+    stopJob(data.app);
+  });
+
+  cron.schedule('0 9 1,2,3,4,5 * *', () => {
+    startJob(data);
+  });
+};
+
+module.exports = { startJob, stopJob, startWorkingHours };
