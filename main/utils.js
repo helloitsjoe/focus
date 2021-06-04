@@ -7,7 +7,10 @@ const cmd = command => {
 
 const ms = mins => mins * 60 * 1000;
 
+const timeLog = (...args) => console.log(new Date().toLocaleString(), ...args);
+
 module.exports = {
   ms,
   cmd,
+  timeLog,
 };

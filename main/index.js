@@ -1,6 +1,6 @@
 const path = require('path');
 const { app, BrowserWindow, Tray, ipcMain } = require('electron');
-const { startJob, stopJob, startWorkingHours } = require('./cron');
+const { stopJob, startWorkingHours } = require('./cron');
 
 const assetsDir = path.join(__dirname, '../assets');
 
