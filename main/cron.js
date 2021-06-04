@@ -2,11 +2,13 @@ const { Notification } = require('electron');
 const cron = require('node-cron');
 const { cmd, ms, timeLog } = require('./utils');
 
-let timeout;
+let warnTimeout;
+let closeTimeout;
 let task;
 
 const WARN_SECONDS = 30;
 const WARN_MS = WARN_SECONDS * 1000;
+const FIVE_MINS = 5 * 60 * 1000;
 
 const activate = ({ bg, app }) =>
   `osascript -e '${bg ? 'launch' : 'activate'} app "${app}"'`;
@@ -18,14 +20,32 @@ const prepareClose = ({ app, activeMins }) => {
     body: `${app} will close in ${WARN_SECONDS} seconds`,
   });
 
-  return setTimeout(() => {
+  warnTimeout = setTimeout(() => {
+    clearTimeout(warnTimeout);
+    clearTimeout(closeTimeout);
+    closeTimeout = null;
+
     notification.show();
 
-    setTimeout(() => {
+    closeTimeout = setTimeout(() => {
       timeLog(`quitting ${app}...`);
       cmd(quit(app));
     }, WARN_MS);
   }, ms(activeMins) - WARN_MS);
+};
+
+const moreTime = ({ app, ms = FIVE_MINS }) => {
+  if (!closeTimeout) {
+    return null;
+  }
+  clearTimeout(closeTimeout);
+  closeTimeout = setTimeout(() => {
+    clearTimeout(closeTimeout);
+    closeTimeout = null;
+    timeLog(`quitting ${app}...`);
+    cmd(quit(app));
+  }, ms);
+  return ms;
 };
 
 const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
@@ -46,11 +66,11 @@ const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
   timeLog(`activateCron:`, activateCron);
 
   cmd(activate({ app, bg }));
-  timeout = prepareClose({ app, activeMins });
+  prepareClose({ app, activeMins });
   task = cron.schedule(activateCron, () => {
     timeLog(`activating ${app}...`);
     cmd(activate({ app, bg }));
-    timeout = prepareClose({ app, activeMins });
+    prepareClose({ app, activeMins });
   });
 
   task.start();
@@ -63,7 +83,7 @@ const stopJob = app => {
   if (task) {
     task.stop();
     task.isRunning = false;
-    clearTimeout(timeout);
+    clearTimeout(warnTimeout);
     cmd(quit(app));
   }
 };
@@ -72,13 +92,13 @@ const startWorkingHours = data => {
   // TODO: Make these configurable from the frontend
   // TODO: Make these cancelable/changeable
   timeLog(`Scheduling work hours`);
-  const stopDay = cron.schedule('1 0 18 mon-fri * *', () => {
-    timeLog(`Shutting down for the night...`);
+  const stopDay = cron.schedule('1 12,18 * * mon-fri ', () => {
+    timeLog(`Shutting down jobs for a while...`);
     stopJob(data.app);
   });
 
-  const startDay = cron.schedule('1 9 mon-fri * *', () => {
-    timeLog(`Starting up for the morning!`);
+  const startDay = cron.schedule('1 9,14 * * mon-fri ', () => {
+    timeLog(`Starting scheduling jobs again!`);
     startJob(data);
   });
 
@@ -88,4 +108,4 @@ const startWorkingHours = data => {
   startJob(data);
 };
 
-module.exports = { startJob, stopJob, startWorkingHours };
+module.exports = { startJob, stopJob, startWorkingHours, moreTime };

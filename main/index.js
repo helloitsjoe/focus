@@ -1,6 +1,6 @@
 const path = require('path');
 const { app, BrowserWindow, Tray, ipcMain } = require('electron');
-const { stopJob, startWorkingHours } = require('./cron');
+const { stopJob, startWorkingHours, moreTime } = require('./cron');
 
 const assetsDir = path.join(__dirname, '../assets');
 
@@ -41,6 +41,16 @@ app.on('ready', () => {
         `${data.app} is not a valid app name`;
 
       e.sender.send('error', message || err);
+    }
+  });
+
+  ipcMain.on('more-time', (e, data) => {
+    try {
+      const available = moreTime(data);
+      e.sender.send('more-time-success', { available });
+    } catch (err) {
+      console.log(`err:`, err);
+      e.sender.send('error', err.message);
     }
   });
 

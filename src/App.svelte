@@ -5,6 +5,7 @@
   let app = '';
   let error = '';
   let activeMins = 5;
+  let moreTimeMessage = '';
   let frequencyMins = 60;
   let nextSession = null;
   let jobRunning = false;
@@ -25,30 +26,50 @@
     ipcRenderer.send('stop-job', { app });
   };
 
+  const askForMoreTime = () => {
+    ipcRenderer.send('more-time', { app });
+  };
+
+  // TODO: Clean up all these state booleans
   ipcRenderer.on('start-success', () => {
     jobRunning = true;
+    moreTimeMessage = '';
     error = '';
   });
 
   ipcRenderer.on('stop-success', () => {
     jobRunning = false;
+    moreTimeMessage = '';
+    error = '';
+  });
+
+  ipcRenderer.on('more-time-success', (e, { available }) => {
+    console.log(`available:`, available);
+    moreTimeMessage = available
+      ? 'You have five more minutes!'
+      : 'You still have time!';
     error = '';
   });
 
   ipcRenderer.on('error', (e, err) => {
     console.error('Error:', err.message || err);
     jobRunning = false;
+    moreTimeMessage = '';
     error = err.message || err;
   });
 </script>
 
 <main>
   <h1>Focus</h1>
+  {#if moreTimeMessage}
+    <p>{moreTimeMessage}</p>
+  {/if}
   {#if jobRunning}
     <p>
       {app} will open for {activeMins} minutes every {frequencyMins} minutes
     </p>
     <button on:click={stopJob}>Stop job</button>
+    <button on:click={askForMoreTime}>Give me more time!</button>
     <TodoList />
   {:else}
     <form on:submit|preventDefault={startJob}>
