@@ -31,7 +31,6 @@ app.on('ready', () => {
 
   ipcMain.on('start-job', (e, data) => {
     try {
-      // startJob(data);
       startWorkingHours(data);
       e.sender.send('start-success');
     } catch (err) {

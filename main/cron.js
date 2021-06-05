@@ -8,44 +8,37 @@ let task;
 
 const WARN_SECONDS = 30;
 const WARN_MS = WARN_SECONDS * 1000;
-const FIVE_MINS = 5 * 60 * 1000;
 
 const activate = ({ bg, app }) =>
-  `osascript -e '${bg ? 'launch' : 'activate'} app "${app}"'`;
+  cmd(`osascript -e '${bg ? 'launch' : 'activate'} app "${app}"'`);
 
-const quit = app => `osascript -e 'quit app "${app}"'`;
+const quit = app => cmd(`osascript -e 'quit app "${app}"'`);
 
 const prepareClose = ({ app, activeMins }) => {
   const notification = new Notification({
     body: `${app} will close in ${WARN_SECONDS} seconds`,
   });
 
-  warnTimeout = setTimeout(() => {
-    clearTimeout(warnTimeout);
-    clearTimeout(closeTimeout);
-    closeTimeout = null;
+  clearTimeout(closeTimeout);
+  closeTimeout = null;
 
+  warnTimeout = setTimeout(() => {
     notification.show();
 
     closeTimeout = setTimeout(() => {
+      closeTimeout = null;
       timeLog(`quitting ${app}...`);
-      cmd(quit(app));
+      quit(app);
     }, WARN_MS);
   }, ms(activeMins) - WARN_MS);
 };
 
-const moreTime = ({ app, ms = FIVE_MINS }) => {
+const moreTime = ({ app, activeMins = 5 }) => {
   if (!closeTimeout) {
     return null;
   }
-  clearTimeout(closeTimeout);
-  closeTimeout = setTimeout(() => {
-    clearTimeout(closeTimeout);
-    closeTimeout = null;
-    timeLog(`quitting ${app}...`);
-    cmd(quit(app));
-  }, ms);
-  return ms;
+  prepareClose({ app, activeMins });
+  return activeMins;
 };
 
 const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
@@ -65,11 +58,11 @@ const startJob = ({ app, activeMins, frequencyMins, bg = false } = {}) => {
   const activateCron = `*/${frequencyMins} * * * *`;
   timeLog(`activateCron:`, activateCron);
 
-  cmd(activate({ app, bg }));
+  activate({ app, bg });
   prepareClose({ app, activeMins });
   task = cron.schedule(activateCron, () => {
     timeLog(`activating ${app}...`);
-    cmd(activate({ app, bg }));
+    activate({ app, bg });
     prepareClose({ app, activeMins });
   });
 
@@ -84,7 +77,7 @@ const stopJob = app => {
     task.stop();
     task.isRunning = false;
     clearTimeout(warnTimeout);
-    cmd(quit(app));
+    quit(app);
   }
 };
 

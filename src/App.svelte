@@ -2,12 +2,13 @@
   const { ipcRenderer } = require('electron');
   import TodoList from './TodoList.svelte';
 
-  let app = '';
+  let app = 'Slack';
   let error = '';
   let activeMins = 5;
   let moreTimeMessage = '';
-  let frequencyMins = 60;
-  let nextSession = null;
+  let frequencyMins = 40;
+  // TODO: implement countdown
+  let countdown = null;
   let jobRunning = false;
 
   $: startDisabled =
@@ -44,11 +45,14 @@
   });
 
   ipcRenderer.on('more-time-success', (e, { available }) => {
-    console.log(`available:`, available);
+    error = '';
     moreTimeMessage = available
       ? 'You have five more minutes!'
       : 'You still have time!';
-    error = '';
+
+    setTimeout(() => {
+      moreTimeMessage = '';
+    }, 3000);
   });
 
   ipcRenderer.on('error', (e, err) => {
