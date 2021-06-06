@@ -1,20 +1,25 @@
 <script>
+  const { ipcRenderer } = require('electron');
+
   const makeTodo = text => ({
     text,
     done: false,
     id: text,
   });
 
-  let todos = [];
+  export let initialTodos = [];
+  let todos = initialTodos;
   let value = '';
 
   const addTodo = () => {
     todos = [...todos, makeTodo(value)];
     value = '';
+    ipcRenderer.send('save-todos', { todos });
   };
 
   const clearDone = () => {
     todos = [...todos.filter(({ done }) => !done)];
+    ipcRenderer.send('save-todos', { todos });
   };
 
   const handleChecked = id => () => {

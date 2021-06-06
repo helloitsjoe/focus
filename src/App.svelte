@@ -4,6 +4,7 @@
 
   let app = 'Slack';
   let error = '';
+  let initialTodos = [];
   let activeMins = 5;
   let moreTimeMessage = '';
   let frequencyMins = 40;
@@ -31,7 +32,12 @@
     ipcRenderer.send('more-time', { app });
   };
 
-  // TODO: Clean up all these state booleans
+  ipcRenderer.on('init-todos', (e, data) => {
+    console.log(`data:`, data);
+    initialTodos = data.todos;
+  });
+
+  // TODO: Clean up all these state booleans - maybe a state machine?!
   ipcRenderer.on('start-success', () => {
     jobRunning = true;
     moreTimeMessage = '';
@@ -74,7 +80,7 @@
     </p>
     <button on:click={stopJob}>Stop job</button>
     <button on:click={askForMoreTime}>Give me more time!</button>
-    <TodoList />
+    <TodoList {initialTodos} />
   {:else}
     <form on:submit|preventDefault={startJob}>
       <label>

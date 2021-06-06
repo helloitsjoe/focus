@@ -1,27 +1,50 @@
 const fs = require('fs');
 const path = require('path');
 
+const dataDir = path.join(process.cwd(), 'data');
+const dataFile = path.join(dataDir, `todos.json`);
+
 const getDateTime = (date = new Date()) => {
   const y = date.getFullYear();
-  const m = date.getMonth() + 1;
-  const d = date.getDate();
-  const t = date.toLocaleTimeString('en-US', { hour12: false });
+  const m = (date.getMonth() + 1).padStart(2, '0');
+  const d = date.getDate().padStart(2, '0');
+  const t = date.toLocaleTimeString('en-US', {
+    hour12: false,
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return [y, m, d, t].join('-');
 };
 
 const saveTodos = todos => {
-  // Just use one file, create new fill when over a certain size
-  const dataPath = path.join(process.cwd(), 'data', `${getDateTime()}.json`);
-  // if (fs.accessSync(dataPath)) {
+  // Just use one file, create new file when over a certain size, or start deleting old entries
 
-  // }
-  fs.writeFileSync(dataPath, JSON.stringify(todos));
+  try {
+    fs.accessSync(dataFile);
+  } catch (e) {
+    fs.mkdirSync(dataDir);
+    fs.writeFileSync(dataFile, '{}');
+  }
+
+  const data = JSON.parse(fs.readFileSync(dataFile).toString());
+  // TODO: Append to file
+  fs.writeFileSync(
+    dataFile,
+    JSON.stringify({ ...data, [getDateTime()]: todos })
+  );
+  console.log('Saved!');
 };
 
 const loadTodos = () => {
-  // Get most recent file
-  // return fs.readFileSync(dataPath)
+  try {
+    const todos = JSON.parse(fs.readFileSync(dataFile).toString());
+    const todosArr = Object.values(todos);
+    return todosArr[todosArr.length - 1];
+  } catch (e) {
+    console.log('No saved todos');
+    return [];
+  }
 };
 
-module.exports = { saveTodos };
+module.exports = { saveTodos, loadTodos };

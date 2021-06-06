@@ -1,6 +1,7 @@
 const path = require('path');
 const { app, BrowserWindow, Tray, ipcMain } = require('electron');
 const { stopJob, startWorkingHours, moreTime } = require('./cron');
+const { saveTodos, loadTodos } = require('./db');
 
 const assetsDir = path.join(__dirname, '../assets');
 
@@ -28,6 +29,11 @@ app.on('ready', () => {
 
   tray.on('click', () => toggleWindow());
   tray.on('double-click', () => window.openDevTools({ mode: 'detach' }));
+
+  window.webContents.on('dom-ready', e => {
+    const todos = loadTodos();
+    e.sender.send('init-todos', { todos });
+  });
 
   ipcMain.on('start-job', (e, data) => {
     try {
@@ -57,6 +63,20 @@ app.on('ready', () => {
     try {
       stopJob(app);
       e.sender.send('stop-success');
+    } catch (err) {
+      console.log(`err:`, err);
+      e.sender.send('error', err.message);
+    }
+  });
+
+  ipcMain.on('save-todos', (e, data) => {
+    console.log(`data:`, data);
+    try {
+      if (!data.todos) {
+        throw new Error('No todos from client');
+      }
+      saveTodos(data.todos);
+      // e.sender.send('save-success');
     } catch (err) {
       console.log(`err:`, err);
       e.sender.send('error', err.message);
