@@ -6,8 +6,8 @@ const dataFile = path.join(dataDir, `todos.json`);
 
 const getDateTime = (date = new Date()) => {
   const y = date.getFullYear();
-  const m = (date.getMonth() + 1).padStart(2, '0');
-  const d = date.getDate().padStart(2, '0');
+  const m = (date.getMonth() + 1).toString().padStart(2, '0');
+  const d = date.getDate().toString().padStart(2, '0');
   const t = date.toLocaleTimeString('en-US', {
     hour12: false,
     hour: '2-digit',

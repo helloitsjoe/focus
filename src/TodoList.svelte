@@ -56,9 +56,14 @@
 </form>
 
 <style>
+  form {
+    margin: auto;
+  }
+
   ul {
     list-style-type: none;
     text-align: left;
+    padding: 10px;
   }
 
   .checked {
@@ -67,5 +72,12 @@
 
   .input-group {
     display: flex;
+    justify-content: center;
+  }
+
+  .input-group > * {
+    display: flex;
+    flex: 1;
+    justify-content: center;
   }
 </style>

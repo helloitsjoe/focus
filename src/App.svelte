@@ -107,7 +107,7 @@
   main {
     text-align: center;
     padding: 1em;
-    max-width: 240px;
+    max-width: 70vw;
     margin: 0 auto;
   }
 
@@ -116,6 +116,12 @@
     text-transform: uppercase;
     font-size: 4em;
     font-weight: 100;
+  }
+
+  form > label {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5em;
   }
 
   .error {

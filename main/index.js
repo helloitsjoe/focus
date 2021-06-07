@@ -9,6 +9,7 @@ let tray;
 let window;
 
 app.on('ready', () => {
+  // TODO: Don't use T logo
   tray = new Tray(path.join(assetsDir, 'mbta-logo-black.png'));
   window = new BrowserWindow({
     x: 800,
@@ -25,7 +26,7 @@ app.on('ready', () => {
   });
 
   window.loadURL(`file://${path.join(__dirname, '../public/index.html')}`);
-  window.on('blur', window.hide);
+  // window.on('blur', window.hide);
 
   tray.on('click', () => toggleWindow());
   tray.on('double-click', () => window.openDevTools({ mode: 'detach' }));
@@ -70,7 +71,6 @@ app.on('ready', () => {
   });
 
   ipcMain.on('save-todos', (e, data) => {
-    console.log(`data:`, data);
     try {
       if (!data.todos) {
         throw new Error('No todos from client');
