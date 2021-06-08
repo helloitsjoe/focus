@@ -26,7 +26,7 @@ app.on('ready', () => {
   });
 
   window.loadURL(`file://${path.join(__dirname, '../public/index.html')}`);
-  // window.on('blur', window.hide);
+  window.on('blur', window.hide);
 
   tray.on('click', () => toggleWindow());
   tray.on('double-click', () => window.openDevTools({ mode: 'detach' }));
@@ -36,52 +36,47 @@ app.on('ready', () => {
     e.sender.send('init-todos', { todos });
   });
 
-  ipcMain.on('start-job', (e, data) => {
+  const handleStartJob = data => {
+    startWorkingHours(data);
+    return ['start-success'];
+  };
+
+  const handleMoreTime = data => {
+    const available = moreTime(data);
+    return ['more-time-success', { available }];
+  };
+
+  const handleStopJob = data => {
+    stopJob(data.app);
+    return ['stop-success'];
+  };
+
+  const handleSaveTodos = data => {
+    if (!data.todos) {
+      throw new Error('No todos from client');
+    }
+    saveTodos(data.todos);
+    return ['save-success'];
+  };
+
+  const handler = fn => (e, data) => {
     try {
-      startWorkingHours(data);
-      e.sender.send('start-success');
+      const res = fn(data);
+      e.sender.send(...res);
     } catch (err) {
       console.log(`err:`, err);
+
       const message =
-        err.stack.match(/Can’t get application/) &&
-        `${data.app} is not a valid app name`;
+        err.stack.match(/Can’t get application/) && `Not a valid app name`;
 
-      e.sender.send('error', message || err);
+      e.sender.send('error', message || err.message);
     }
-  });
+  };
 
-  ipcMain.on('more-time', (e, data) => {
-    try {
-      const available = moreTime(data);
-      e.sender.send('more-time-success', { available });
-    } catch (err) {
-      console.log(`err:`, err);
-      e.sender.send('error', err.message);
-    }
-  });
-
-  ipcMain.on('stop-job', (e, { app }) => {
-    try {
-      stopJob(app);
-      e.sender.send('stop-success');
-    } catch (err) {
-      console.log(`err:`, err);
-      e.sender.send('error', err.message);
-    }
-  });
-
-  ipcMain.on('save-todos', (e, data) => {
-    try {
-      if (!data.todos) {
-        throw new Error('No todos from client');
-      }
-      saveTodos(data.todos);
-      // e.sender.send('save-success');
-    } catch (err) {
-      console.log(`err:`, err);
-      e.sender.send('error', err.message);
-    }
-  });
+  ipcMain.on('start-job', handler(handleStartJob));
+  ipcMain.on('more-time', handler(handleMoreTime));
+  ipcMain.on('stop-job', handler(handleStopJob));
+  ipcMain.on('save-todos', handler(handleSaveTodos));
 });
 
 const toggleWindow = () => {

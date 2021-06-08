@@ -18,7 +18,7 @@
   };
 
   const clearDone = () => {
-    todos = [...todos.filter(({ done }) => !done)];
+    todos = todos.filter(({ done }) => !done);
     ipcRenderer.send('save-todos', { todos });
   };
 

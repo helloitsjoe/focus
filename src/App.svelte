@@ -20,22 +20,12 @@
       ? 'Active minutes must be less than minutes between sessions'
       : '';
 
-  const startJob = () => {
+  const startJob = () =>
     ipcRenderer.send('start-job', { app, activeMins, frequencyMins });
-  };
+  const stopJob = () => ipcRenderer.send('stop-job', { app });
+  const askForMoreTime = () => ipcRenderer.send('more-time', { app });
 
-  const stopJob = () => {
-    ipcRenderer.send('stop-job', { app });
-  };
-
-  const askForMoreTime = () => {
-    ipcRenderer.send('more-time', { app });
-  };
-
-  ipcRenderer.on('init-todos', (e, data) => {
-    console.log(`data:`, data);
-    initialTodos = data.todos;
-  });
+  ipcRenderer.on('init-todos', (e, data) => (initialTodos = data.todos));
 
   // TODO: Clean up all these state booleans - maybe a state machine?!
   ipcRenderer.on('start-success', () => {
