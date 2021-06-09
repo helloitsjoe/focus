@@ -124,7 +124,7 @@
   main {
     text-align: center;
     padding: 1em;
-    padding-top: 3em;
+    padding-top: 4em;
     max-width: 70vw;
     margin: 0 auto;
   }
@@ -140,10 +140,11 @@
     color: white;
     font-weight: 900;
     padding: 0;
+    padding-top: 1em;
     text-transform: uppercase;
-    background-color: #23613e;
+    background: linear-gradient(darkblue, royalblue);
     position: absolute;
-    top: -1px;
+    top: 0;
     left: 0;
     letter-spacing: -10px;
     width: 100%;
