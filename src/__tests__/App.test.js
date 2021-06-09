@@ -5,7 +5,7 @@ describe('App.svelte', () => {
   it('renders Hello with `name` prop', () => {
     render(App);
     expect(screen.queryByText(/focus/i)).toBeTruthy();
-    expect(screen.queryByText(/enter an app/i)).toBeTruthy();
+    expect(screen.queryByText(/app name/i)).toBeTruthy();
   });
 
   it.todo('button is disabled until app, active and frequency are filled');

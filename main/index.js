@@ -1,7 +1,9 @@
 const path = require('path');
 const { app, BrowserWindow, Tray, ipcMain } = require('electron');
-const { stopJob, startWorkingHours, moreTime } = require('./cron');
+const { createCron } = require('./cron');
 const { saveTodos, loadTodos } = require('./db');
+
+const { stopJob, startWorkingHours, moreTime } = createCron();
 
 const assetsDir = path.join(__dirname, '../assets');
 
@@ -37,12 +39,12 @@ app.on('ready', () => {
   });
 
   const handleStartJob = data => {
-    startWorkingHours(data);
+    startWorkingHours(data, window);
     return ['start-success'];
   };
 
   const handleMoreTime = data => {
-    const available = moreTime(data);
+    const available = moreTime(data, window);
     return ['more-time-success', { available }];
   };
 

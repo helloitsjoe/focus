@@ -1,5 +1,6 @@
 <script>
   const { ipcRenderer } = require('electron');
+  import { formatTime } from './utils';
   import TodoList from './TodoList.svelte';
 
   let app = 'Slack';
@@ -8,8 +9,8 @@
   let activeMins = 5;
   let moreTimeMessage = '';
   let frequencyMins = 40;
-  // TODO: implement countdown
   let countdown = null;
+  let interval = null;
   let jobRunning = false;
 
   $: startDisabled =
@@ -23,9 +24,26 @@
   const startJob = () =>
     ipcRenderer.send('start-job', { app, activeMins, frequencyMins });
   const stopJob = () => ipcRenderer.send('stop-job', { app });
-  const askForMoreTime = () => ipcRenderer.send('more-time', { app });
+  const askForMoreTime = () =>
+    ipcRenderer.send('more-time', { app, activeMins });
+
+  $: {
+    if (!interval) {
+      interval = setInterval(() => {
+        if (countdown <= 0) {
+          clearInterval(interval);
+          countdown = 0;
+        }
+        if (countdown != null) {
+          countdown -= 1000;
+        }
+      }, 1000);
+    }
+  }
 
   ipcRenderer.on('init-todos', (e, data) => (initialTodos = data.todos));
+  ipcRenderer.on('activate', () => (countdown = activeMins * 60 * 1000));
+  ipcRenderer.on('quit', () => (countdown = frequencyMins * 60 * 1000));
 
   // TODO: Clean up all these state booleans - maybe a state machine?!
   ipcRenderer.on('start-success', () => {
@@ -38,6 +56,8 @@
     jobRunning = false;
     moreTimeMessage = '';
     error = '';
+    countdown = null;
+    interval = null;
   });
 
   ipcRenderer.on('more-time-success', (e, { available }) => {
@@ -56,10 +76,13 @@
     jobRunning = false;
     moreTimeMessage = '';
     error = err.message || err;
+    countdown = null;
+    interval = null;
   });
 </script>
 
 <main>
+  <p>{formatTime(countdown)}</p>
   <h1>Focus</h1>
   {#if moreTimeMessage}
     <p>{moreTimeMessage}</p>
