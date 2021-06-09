@@ -1,6 +1,8 @@
-import { cmd } from './utils';
+const { cmd } = require('./utils');
 
-export const activate = ({ bg, app }) =>
+const activate = ({ bg, app }) =>
   cmd(`osascript -e '${bg ? 'launch' : 'activate'} app "${app}"'`);
 
-export const quit = app => cmd(`osascript -e 'quit app "${app}"'`);
+const quit = app => cmd(`osascript -e 'quit app "${app}"'`);
+
+module.exports = { activate, quit };

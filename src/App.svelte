@@ -30,12 +30,12 @@
   $: {
     if (!interval) {
       interval = setInterval(() => {
-        if (countdown <= 0) {
-          clearInterval(interval);
-          countdown = 0;
-        }
         if (countdown != null) {
           countdown -= 1000;
+        }
+        if (countdown < 0) {
+          clearInterval(interval);
+          countdown = 0;
         }
       }, 1000);
     }
@@ -56,6 +56,7 @@
     jobRunning = false;
     moreTimeMessage = '';
     error = '';
+    clearInterval(interval);
     countdown = null;
     interval = null;
   });
@@ -76,14 +77,17 @@
     jobRunning = false;
     moreTimeMessage = '';
     error = err.message || err;
+    clearInterval(interval);
     countdown = null;
     interval = null;
   });
 </script>
 
 <main>
-  <p>{formatTime(countdown)}</p>
-  <h1>Focus</h1>
+  <div class="header">
+    <h1>Focus</h1>
+  </div>
+  <div class="countdown">{formatTime(countdown)}</div>
   {#if moreTimeMessage}
     <p>{moreTimeMessage}</p>
   {/if}
@@ -120,15 +124,35 @@
   main {
     text-align: center;
     padding: 1em;
+    padding-top: 3em;
     max-width: 70vw;
     margin: 0 auto;
   }
 
   h1 {
-    color: #ff3e00;
-    text-transform: uppercase;
     font-size: 4em;
-    font-weight: 100;
+    margin: 0 auto;
+    padding: 0;
+    line-height: 0.7;
+  }
+
+  .header {
+    color: white;
+    font-weight: 900;
+    padding: 0;
+    text-transform: uppercase;
+    background-color: #23613e;
+    position: absolute;
+    top: -1px;
+    left: 0;
+    letter-spacing: -10px;
+    width: 100%;
+    /* transform: translateX(-50%); */
+  }
+
+  .countdown {
+    font-size: 1.5em;
+    font-weight: 700;
   }
 
   form > label {

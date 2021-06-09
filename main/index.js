@@ -1,5 +1,5 @@
 const path = require('path');
-const { app, BrowserWindow, Tray, ipcMain } = require('electron');
+const { app, screen, BrowserWindow, Tray, ipcMain } = require('electron');
 const { createCron } = require('./cron');
 const { saveTodos, loadTodos } = require('./db');
 
@@ -13,8 +13,10 @@ let window;
 app.on('ready', () => {
   // TODO: Don't use T logo
   tray = new Tray(path.join(assetsDir, 'mbta-logo-black.png'));
+  const display = screen.getPrimaryDisplay();
+  const { width } = display.bounds;
   window = new BrowserWindow({
-    x: 800,
+    x: width - 700,
     y: 0,
     width: 380,
     height: 500,
