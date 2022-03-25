@@ -28,7 +28,7 @@
     "svelte-jester": "^1.5.0"
   },
   "dependencies": {
-    "electron": "^13.0.1",
+    "electron": "^13.6.6",
     "node-cron": "^3.0.0",
     "sirv-cli": "^1.0.0"
   }
