@@ -105,5 +105,5 @@ const createCron = () => {
 
   return { startJob, stopJob, startWorkingHours, moreTime };
 };
-// module.exports = { startJob, stopJob, startWorkingHours, moreTime };
+
 module.exports = { createCron };
